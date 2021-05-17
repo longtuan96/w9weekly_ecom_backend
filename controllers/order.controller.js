@@ -26,7 +26,9 @@ orderController.createOrder = async (req, res, next) => {
 orderController.getAllOrders = async (req, res, next) => {
   try {
     let { ...query } = req.query;
-    const orders = await Order.find({ ...query }).populate("userId");
+    const orders = await Order.findOne({ ...query })
+      .populate("userId")
+      .populate("products");
     utilsHelper.sendResponse(
       res,
       200,
@@ -34,6 +36,25 @@ orderController.getAllOrders = async (req, res, next) => {
       { orders },
       null,
       "get all orders success"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+orderController.getCurrentUserOrder = async (req, res, next) => {
+  try {
+    let { ...query } = req.query;
+    let userId = req.params.id;
+    const order = await Order.findOne({ ...query, userId: userId })
+      .populate("userId")
+      .populate("products");
+    utilsHelper.sendResponse(
+      res,
+      200,
+      true,
+      { order },
+      null,
+      "get current User Order success"
     );
   } catch (error) {
     next(error);

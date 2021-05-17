@@ -5,7 +5,7 @@ const productSchema = Schema(
     name: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
-    images: [{ imageUrl: { type: String, required: true } }],
+    image: { type: String },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamp: true }

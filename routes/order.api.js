@@ -19,19 +19,25 @@ router.post("/", loginRequired, orderController.createOrder);
  */
 router.put("/:id/update", loginRequired, orderController.updateOrder);
 
-/**
- * @route GET api/orders/:id
- * @description User can see order detail
- * @access Login required
- */
-router.get("/:id", loginRequired, orderController.getDetailOrder);
+// /**
+//  * @route GET api/orders/:id
+//  * @description User can see order detail
+//  * @access Login required
+//  */
+// router.get("/:id", loginRequired, orderController.getDetailOrder);
 
 /**
- * @route GET api/orders
+ * @route GET api/orders/all
  * @description User can see order detail
  * @access Login required
  */
-router.get("/", loginRequired, adminRequired, orderController.getAllOrders);
+router.get("/all", orderController.getAllOrders);
+/**
+ * @route GET api/orders/:id
+ * @description User can see their order
+ * @access Login required
+ */
+router.get("/:id", loginRequired, orderController.getCurrentUserOrder);
 
 /**
  * @route POST api/orders/:id

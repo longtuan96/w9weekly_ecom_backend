@@ -37,18 +37,18 @@ productController.getAllProducts = async (req, res, next) => {
 //Add new product
 productController.addProduct = async (req, res, next) => {
   try {
-    let { name, description, price, images } = req.body;
-    const products = await Product.create({
+    let { name, description, price, image } = req.body;
+    const product = await Product.create({
       name,
       description,
       price,
-      images,
+      image,
     });
     utilsHelper.sendResponse(
       res,
       200,
       true,
-      { products },
+      { product },
       null,
       "product created"
     );
@@ -60,7 +60,7 @@ productController.addProduct = async (req, res, next) => {
 productController.updateProduct = async (req, res, next) => {
   try {
     const productId = req.params.id;
-    const { name, description, price, images } = req.body;
+    const { name, description, price, image } = req.body;
 
     const product = await Product.findOneAndUpdate(
       {
@@ -70,7 +70,7 @@ productController.updateProduct = async (req, res, next) => {
         name,
         description,
         price,
-        images,
+        image,
       },
       {
         new: true,
