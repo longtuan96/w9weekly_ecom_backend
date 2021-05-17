@@ -30,16 +30,11 @@ router.get("/:id/order", loginRequired, userController.getCurrentUserOrder);
  * @description User can make payment
  * @access Login required
  */
-router.put(
-  "/:id/payment",
-  loginRequired,
-  adminRequired,
-  userController.paymentUserOrder
-);
+router.put("/:id/payment", loginRequired, userController.paymentUserOrder);
 /**
  * @route PUT api/users/:id/topup
  * @description Top-up user balance
- * @access Admin requied
+ * @access Login required
  */
-router.put("/:id"), loginRequired, adminRequired, userController.topUpUser;
+router.put("/topup", loginRequired, userController.topUpUser);
 module.exports = router;

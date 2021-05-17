@@ -12,10 +12,26 @@ userController.register = async (req, res, next) => {
 
     const salt = await bcrypt.genSalt(10);
     password = await bcrypt.hash(password, salt);
-
+    const order = await Order.create({});
     user = await User.create({ name, email, password });
-
-    utilsHelper.sendResponse(res, 200, true, { user }, null, "Created account");
+    const completeUser = await User.findByIdAndUpdate(
+      user._id,
+      { order: order._id },
+      { new: true }
+    );
+    await Order.findByIdAndUpdate(
+      order._id,
+      { userId: user._id },
+      { new: true }
+    );
+    utilsHelper.sendResponse(
+      res,
+      200,
+      true,
+      { user: completeUser },
+      null,
+      "Created account"
+    );
   } catch (error) {
     utilsHelper.sendResponse(res, 400, false, null, null, error.message);
   }
@@ -23,12 +39,13 @@ userController.register = async (req, res, next) => {
 
 userController.getCurrentUser = async (req, res, next) => {
   try {
-    const currentUser = await User.findOne({ _id: req.userId });
+    const currentUser = await await User.findOne({ _id: req.userId });
+
     utilsHelper.sendResponse(
       res,
       200,
       true,
-      { currentUser },
+      { user: currentUser },
       null,
       "Current User info!!"
     );
@@ -90,12 +107,11 @@ userController.paymentUserOrder = async (req, res, next) => {
   try {
     //get request detail
     const orderId = req.params.id;
-    const currentUserId = req.userId;
-
+    const total = req.body.total;
     //find the order to pay , get balance
     const order = await Order.findById(orderId);
-    const currentUser = await User.findById(currentUserId);
-    const total = order.total;
+    const currentUser = await User.findById(req.userId);
+
     const funds = currentUser.balance;
     //check funds
     if (total > funds) {
@@ -104,7 +120,7 @@ userController.paymentUserOrder = async (req, res, next) => {
       //update new balance
       await User.findByIdAndUpdate(
         {
-          _id: currentUserId,
+          _id: req.userId,
         },
         { balance: funds - total },
         { new: true }
@@ -114,17 +130,18 @@ userController.paymentUserOrder = async (req, res, next) => {
         {
           _id: orderId,
         },
-        { status: "paid" },
+        { status: "paid", isDeleted: true },
         { new: true }
       );
-      utilsHelper.sendResponse(
-        res,
-        200,
-        true,
-        { order, page, totalPages },
-        null,
-        "order paided"
+      //create new order
+      const newOrder = await Order.create({ userId: req.userId });
+      //update current user with new order
+      await User.findByIdAndUpdate(
+        req.userId,
+        { order: newOrder._id },
+        { new: true }
       );
+      utilsHelper.sendResponse(res, 200, true, null, null, "order paided");
     }
   } catch (error) {
     next(error);
@@ -133,17 +150,17 @@ userController.paymentUserOrder = async (req, res, next) => {
 
 userController.topUpUser = async (req, res, next) => {
   try {
-    const userId = req.params.id;
-    const { topUp } = req.body;
+    let topUp = req.body.topup;
 
     //aquire user current balance
-    const UserBalance = await User.findById(userId).balance;
+    const user = await User.findById(req.userId);
     //update user new balance
+
     await User.findByIdAndUpdate(
       {
-        _id: userId,
+        _id: req.userId,
       },
-      { balance: UserBalance + topUp },
+      { balance: parseInt(user.balance) + parseInt(topUp) },
       { new: true }
     );
 
@@ -151,7 +168,7 @@ userController.topUpUser = async (req, res, next) => {
       res,
       200,
       true,
-      { order, page, totalPages },
+      null,
       null,
       `Wallet increase by ${topUp}!!`
     );

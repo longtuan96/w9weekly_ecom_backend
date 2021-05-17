@@ -3,8 +3,8 @@ const Product = require("./Product");
 const Schema = mongoose.Schema;
 const orderSchema = Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User" },
-    products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+    userId: { type: String, default: "" },
+    products: [{ type: Schema.Types.ObjectId, ref: "Product", default: "" }],
     status: { type: String, emum: ["pending", "paid"], default: "pending" },
 
     isDeleted: { type: Boolean, default: false },
